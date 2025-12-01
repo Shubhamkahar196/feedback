@@ -4,7 +4,7 @@ import bcrypt from "bcryptjs";
 import dbConnect from "@/lib/dbConnect";
 import UserModel from "@/model/User";
 
-export const nextAuth: NextAuthOptions = {
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       id: "credetials",
@@ -52,11 +52,20 @@ export const nextAuth: NextAuthOptions = {
   ],
   callbacks:{
        async session({ session,  token }) {
+        if(token){
+            session.user._id = token._id
+            session.user.isVerified = token.isVerified
+            session.user.isAcceptingMessages = token.isAcceptingMessages
+            session.user.username = token.username
+        }
       return session
     },
     async jwt({ token,  user }) {
         if(user){
             token._id = user._id?.toString()
+            token._isVerified = user.isVerified;
+            token._isAcceptingMessages = user.isAcceptingMessages;
+            token.username = user.username
         }
       return token
     }
