@@ -1,5 +1,5 @@
 import { google } from "@ai-sdk/google";
-import { streamText } from "ai";
+import { generateText } from "ai";
 import { NextResponse } from "next/server";
 
 export const runtime = "edge";
@@ -17,21 +17,14 @@ export async function POST(req: Request) {
     }
 
     const prompt =
-      "Create a list of three open-ended and engaging questions formatted as a single string separated by '||'. Avoid personal topics.";
+      "Create exactly three open-ended and engaging questions. Format your response as a single line with each question separated by '||' only. Do not include numbers, bullets, or any other text. Avoid personal topics. Example: What is your favorite hobby?||How do you like to spend your free time?||What are some interesting facts you know?";
 
-    const result = await streamText({
+    const result = await generateText({
       model: google("gemini-2.5-flash"),
       prompt,
-      providerOptions: {
-        google: {
-          thinkingConfig: {
-            thinkingBudget: 2048,
-          },
-        },
-      },
     });
 
-    return result.toTextStreamResponse();
+    return new Response(result.text);
   } catch (error: any) {
     console.error("Gemini API Error:", error);
 
