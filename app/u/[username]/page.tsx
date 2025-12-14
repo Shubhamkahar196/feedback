@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios, { AxiosError } from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -42,7 +42,10 @@ const initialMessageString =
 
 export default function SendMessage() {
   const params = useParams();
-  const username = params?.username;
+  const username = params?.username as string;
+
+  const [userExists, setUserExists] = useState<boolean | null>(null);
+  const [checkingUser, setCheckingUser] = useState(true);
 
   const {
     complete,
@@ -53,6 +56,25 @@ export default function SendMessage() {
     api: "/api/suggest-message",
     initialCompletion: initialMessageString,
   });
+
+  useEffect(() => {
+    const checkUserExists = async () => {
+      if (!username) {
+        setUserExists(false);
+        setCheckingUser(false);
+        return;
+      }
+      try {
+        const response = await axios.get(`/u/${encodeURIComponent(username)}`);
+        setUserExists(response.data.exists ?? true);
+      } catch (err: unknown) {
+        setUserExists(false);
+      } finally {
+        setCheckingUser(false);
+      }
+    };
+    checkUserExists();
+  }, [username]);
 
   const form = useForm<z.infer<typeof MessageSchema>>({
     resolver: zodResolver(MessageSchema),
@@ -93,7 +115,7 @@ export default function SendMessage() {
 
       // reset the content field only
       form.reset({ ...form.getValues(), content: "" });
-    } catch (err: any) {
+    } catch (err: unknown) {
       const axiosError = err as AxiosError<ApiResponse>;
       toast.error("Failed to send message")
     } finally {
@@ -117,6 +139,27 @@ export default function SendMessage() {
       <div className="container mx-auto my-8 p-6 bg-white rounded max-w-4xl">
         <h1 className="text-2xl font-semibold mb-4">Invalid profile</h1>
         <p>Profile username missing from URL. Please check the link.</p>
+        <Separator className="my-6" />
+        <Link href="/sign-up">
+          <Button>Create Your Account</Button>
+        </Link>
+      </div>
+    );
+  }
+
+  if (checkingUser) {
+    return (
+      <div className="container mx-auto my-8 p-6 bg-white rounded max-w-4xl text-center">
+        Checking user...
+      </div>
+    );
+  }
+
+  if (userExists === false) {
+    return (
+      <div className="container mx-auto my-8 p-6 bg-white rounded max-w-4xl">
+        <h1 className="text-2xl font-semibold mb-4">User not found</h1>
+        <p>This user does not exist. Please check the link.</p>
         <Separator className="my-6" />
         <Link href="/sign-up">
           <Button>Create Your Account</Button>
