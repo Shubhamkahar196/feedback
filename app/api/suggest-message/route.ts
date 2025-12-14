@@ -20,7 +20,7 @@ export async function POST(req: Request) {
       "Create a list of three open-ended and engaging questions formatted as a single string separated by '||'. Avoid personal topics.";
 
     const result = await streamText({
-      model: google("gemini-2.5-flash-preview-04-17"),
+      model: google("gemini-2.5-flash"),
       prompt,
       providerOptions: {
         google: {
