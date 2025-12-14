@@ -1,8 +1,7 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
+
 import { Mail } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Autoplay from "embla-carousel-autoplay";
@@ -35,7 +34,7 @@ export default function Home() {
             <CarouselContent>
               {messages.length > 0 ? (
                 messages.map((m, index) => (
-                  <CarouselItem key={m.id ?? index} className="p-4">
+                  <CarouselItem key={index} className="p-4">
                     <Card>
                       <CardHeader>
                         <CardTitle>{m.title}</CardTitle>
