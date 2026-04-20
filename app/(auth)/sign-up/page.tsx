@@ -115,7 +115,7 @@ const SignUpPage = () => {
               )}
             />
 
-            <Button type="submit" disabled={isSubmitting}>
+            <Button className="cursor-pointer" type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -131,7 +131,7 @@ const SignUpPage = () => {
         <div className="text-center mt-4">
           <p>
             Already a member?{" "}
-            <Link href="/sign-in" className="text-blue-600 hover:text-blue-800">
+            <Link href="/sign-in" className="text-blue-600 cursor-pointer hover:text-blue-800">
               Sign in
             </Link>
           </p>

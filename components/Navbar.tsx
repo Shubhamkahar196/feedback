@@ -12,8 +12,6 @@ const Navbar: React.FC = () => {
 
   const handleLogout = () => {
     logout();
-    // redirect to sign-in after logout
-    // you can also use next/navigation router.replace if you prefer
     window.location.href = "/sign-in";
   };
 
@@ -27,13 +25,13 @@ const Navbar: React.FC = () => {
         {isAuthenticated ? (
           <div className="flex items-center gap-4">
             <span className="text-sm">Welcome, <strong>{username}</strong></span>
-            <Button onClick={handleLogout} className="w-full md:w-auto">
+            <Button onClick={handleLogout} className="w-full md:w-auto cursor-pointer">
               Logout
             </Button>
           </div>
         ) : (
           <Link href="/sign-in">
-            <Button className="w-full md:w-auto">Login</Button>
+            <Button className="w-full md:w-auto cursor-pointer">Login</Button>
           </Link>
         )}
       </div>

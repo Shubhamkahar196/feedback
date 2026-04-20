@@ -141,7 +141,7 @@ export default function SendMessage() {
         <p>Profile username missing from URL. Please check the link.</p>
         <Separator className="my-6" />
         <Link href="/sign-up">
-          <Button>Create Your Account</Button>
+          <Button className="cursor-pointer">Create Your Account</Button>
         </Link>
       </div>
     );
@@ -162,7 +162,7 @@ export default function SendMessage() {
         <p>This user does not exist. Please check the link.</p>
         <Separator className="my-6" />
         <Link href="/sign-up">
-          <Button>Create Your Account</Button>
+          <Button className="cursor-pointer">Create Your Account</Button>
         </Link>
       </div>
     );
@@ -198,12 +198,13 @@ export default function SendMessage() {
           <div className="flex justify-center">
             {isLoading ? (
               <Button disabled>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin cursor-pointer" />
                 Please wait
               </Button>
             ) : (
               <Button
                 type="submit"
+                className="cursor-pointer"
                 disabled={isLoading || isSuggestLoading || !(messageContent || "").trim()}
               >
                 Send It
@@ -215,7 +216,7 @@ export default function SendMessage() {
 
       <div className="space-y-4 my-8">
         <div className="space-y-2">
-          <Button onClick={fetchSuggestedMessages} className="my-4" disabled={isSuggestLoading}>
+          <Button  onClick={fetchSuggestedMessages} className="my-4 cursor-pointer" disabled={isSuggestLoading}>
             {isSuggestLoading ? "Loading..." : "Suggest Messages"}
           </Button>
           <p className="text-sm text-muted-foreground">Click on any message below to select it.</p>
@@ -230,7 +231,7 @@ export default function SendMessage() {
               <p className="text-red-500">{error.message}</p>
             ) : (
               suggested.map((message, index) => (
-                <Button key={index} variant="outline" className="mb-2" onClick={() => handleMessageClick(message)}>
+                <Button key={index} variant="outline" className="mb-2 cursor-pointer" onClick={() => handleMessageClick(message)}>
                   {message}
                 </Button>
               ))
@@ -244,9 +245,262 @@ export default function SendMessage() {
       <div className="text-center">
         <div className="mb-4">Get Your Message Board</div>
         <Link href={"/sign-up"}>
-          <Button>Create Your Account</Button>
+          <Button className="cursor-pointer">Create Your Account</Button>
         </Link>
       </div>
     </div>
   );
 }
+
+
+
+// "use client";
+
+// import React, { useState, useEffect } from "react";
+// import axios, { AxiosError } from "axios";
+// import { zodResolver } from "@hookform/resolvers/zod";
+// import { useForm } from "react-hook-form";
+// import { Loader2 } from "lucide-react";
+// import { Button } from "@/components/ui/button";
+// import { Separator } from "@/components/ui/separator";
+// import { CardHeader, CardContent, Card } from "@/components/ui/card";
+// import { useCompletion } from "@ai-sdk/react";
+// import {
+//   Form,
+//   FormControl,
+//   FormField,
+//   FormItem,
+//   FormLabel,
+//   FormMessage,
+// } from "@/components/ui/form";
+// import { Textarea } from "@/components/ui/textarea";
+
+// import * as z from "zod";
+// import { ApiResponse } from "@/app/types/ApiResponse";
+// import Link from "next/link";
+// import { useParams } from "next/navigation";
+// import { MessageSchema } from "@/app/schema/messageSchema";
+// import { toast } from "sonner";
+
+// const specialChar = "||";
+
+// const parseStringMessages = (messageString: string): string[] => {
+//   if (!messageString) return [];
+//   return messageString
+//     .split(specialChar)
+//     .map((s) => s.trim())
+//     .filter(Boolean);
+// };
+
+// const initialMessageString =
+//   "What's your favorite movie?||Do you have any pets?||What's your dream job?";
+
+// export default function SendMessage() {
+//   const params = useParams();
+//   const username = params?.username as string;
+
+//   const [userExists, setUserExists] = useState<boolean | null>(null);
+//   const [checkingUser, setCheckingUser] = useState(true);
+
+//   // ✅ AI Hook
+//   const {
+//     complete,
+//     completion,
+//     isLoading: isSuggestLoading,
+//     error,
+//   } = useCompletion({
+//     api: "/api/suggest-message",
+//     initialCompletion: initialMessageString,
+//   });
+
+//   // 🔥 DEBUG (very important)
+//   useEffect(() => {
+//     console.log("AI COMPLETION:", completion);
+//   }, [completion]);
+
+//   useEffect(() => {
+//     const checkUserExists = async () => {
+//       if (!username) {
+//         setUserExists(false);
+//         setCheckingUser(false);
+//         return;
+//       }
+//       try {
+//         const response = await axios.get(`/u/${encodeURIComponent(username)}`);
+//         setUserExists(response.data.exists ?? true);
+//       } catch {
+//         setUserExists(false);
+//       } finally {
+//         setCheckingUser(false);
+//       }
+//     };
+//     checkUserExists();
+//   }, [username]);
+
+//   const form = useForm<z.infer<typeof MessageSchema>>({
+//     resolver: zodResolver(MessageSchema),
+//     defaultValues: { content: "" },
+//   });
+
+//   const messageContent = form.watch("content");
+
+//   const handleMessageClick = (message: string) => {
+//     form.setValue("content", message);
+//   };
+
+//   const [isLoading, setIsLoading] = useState(false);
+
+//   const onSubmit = async (data: z.infer<typeof MessageSchema>) => {
+//     if (!username) {
+//       toast.error("Missing username");
+//       return;
+//     }
+
+//     const content = data.content?.trim();
+//     if (!content) {
+//       toast.error("Please enter message");
+//       return;
+//     }
+
+//     setIsLoading(true);
+//     try {
+//       await axios.post<ApiResponse>("/api/send-message", {
+//         content,
+//         username,
+//       });
+
+//       toast.success("Message sent");
+//       form.reset({ ...form.getValues(), content: "" });
+//     } catch (err: unknown) {
+//       const axiosError = err as AxiosError<ApiResponse>;
+//       toast.error("Failed to send message");
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   };
+
+//   // ✅ Trigger AI
+//   const fetchSuggestedMessages = async () => {
+//     try {
+//       await complete(""); // triggers API
+//     } catch (err) {
+//       console.error(err);
+//       toast.error("Failed to fetch suggestions");
+//     }
+//   };
+
+//   // 🔐 Safety UI states
+//   if (!username) {
+//     return (
+//       <div className="container mx-auto my-8 p-6 bg-white rounded max-w-4xl">
+//         <h1 className="text-2xl font-semibold mb-4">Invalid profile</h1>
+//         <p>Username missing in URL</p>
+//       </div>
+//     );
+//   }
+
+//   if (checkingUser) {
+//     return <div className="text-center mt-10">Checking user...</div>;
+//   }
+
+//   if (userExists === false) {
+//     return (
+//       <div className="text-center mt-10">
+//         <h1>User not found</h1>
+//       </div>
+//     );
+//   }
+
+//   // ✅ Use AI result OR fallback initial
+//   const messagesString = completion || initialMessageString;
+//   const suggested = parseStringMessages(messagesString);
+
+//   return (
+//     <div className="container mx-auto my-8 p-6 bg-white rounded max-w-4xl">
+//       <h1 className="text-4xl font-bold mb-6 text-center">
+//         Send Anonymous Message
+//       </h1>
+
+//       {/* FORM */}
+//       <Form {...form}>
+//         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+//           <FormField
+//             control={form.control}
+//             name="content"
+//             render={({ field }) => (
+//               <FormItem>
+//                 <FormLabel>Message to @{username}</FormLabel>
+//                 <FormControl>
+//                   <Textarea placeholder="Write message..." {...field} />
+//                 </FormControl>
+//                 <FormMessage />
+//               </FormItem>
+//             )}
+//           />
+
+//           <div className="flex justify-center">
+//             <Button
+//               type="submit"
+//               disabled={
+//                 isLoading ||
+//                 isSuggestLoading ||
+//                 !(messageContent || "").trim()
+//               }
+//             >
+//               {isLoading ? (
+//                 <Loader2 className="h-4 w-4 animate-spin" />
+//               ) : (
+//                 "Send"
+//               )}
+//             </Button>
+//           </div>
+//         </form>
+//       </Form>
+
+//       {/* AI SECTION */}
+//       <div className="space-y-4 my-8">
+//         <Button
+//           onClick={fetchSuggestedMessages}
+//           disabled={isSuggestLoading}
+//         >
+//           {isSuggestLoading ? (
+//             <Loader2 className="h-4 w-4 animate-spin" />
+//           ) : (
+//             "Suggest Messages"
+//           )}
+//         </Button>
+
+//         <Card>
+//           <CardHeader>
+//             <h3 className="text-xl font-semibold">Suggestions</h3>
+//           </CardHeader>
+
+//           <CardContent>
+//             {error ? (
+//               <p className="text-red-500">{error.message}</p>
+//             ) : (
+//               suggested.map((msg, i) => (
+//                 <Button
+//                   key={i}
+//                   variant="outline"
+//                   className="mb-2 w-full"
+//                   onClick={() => handleMessageClick(msg)}
+//                 >
+//                   {msg}
+//                 </Button>
+//               ))
+//             )}
+//           </CardContent>
+//         </Card>
+//       </div>
+
+//       <Separator />
+
+//       <div className="text-center mt-6">
+//         <Link href="/sign-up">
+//           <Button>Create Account</Button>
+//         </Link>
+//       </div>
+//     </div>
+//   );
+// }
